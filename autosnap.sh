@@ -11,7 +11,7 @@
 # 00 0    * * *   root    /bin/bash /etc/ceph/scripts/autosnap.sh
 #
 # Add in your smb.conf in global or specific share section :
-# vfs objects = acl_xattr recycle shadow_copy2
+# vfs objects = shadow_copy2
 # shadow:snapdir = .snapshots
 # shadow:sort = desc
 
