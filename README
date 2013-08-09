@@ -1,11 +1,15 @@
 autosnap-rbd-shadow-copy
 ========================
 
-Snapshot script for Ceph RBD and Samba vfs shadow_copy2
+This script make snapshot on Ceph RBD device and mount them for use with Samba vfs shadow_copy2.
+
+
+Test
+========================
 
 For test, you need to have a Ceph cluster running and Samba installed on client.
 
-Verify admin access to the ceph cluster : (should no return error)
+Verify admin access to the ceph cluster : (should not return error)
 $ rbd ls
 
 Get this script :
