@@ -39,7 +39,7 @@ log      =internal log           bsize=4096   blocks=2560, version=2
          =                       sectsz=512   sunit=8 blks, lazy-count=1
 realtime =none                   extsz=4096   blocks=0, rtextents=0
 
-$ Mount the share
+Mount the share
 $ mkdir /myshare
 $ echo "/dev/rbd/rbd/myshare /myshare xfs defaults 0 0" >> /etc/fstab
 $ mount /myshare
