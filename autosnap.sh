@@ -35,7 +35,7 @@ makesnapshot() {
 		&& echo -n "synced, " \
 		&& xfs_freeze -f $sharedirectory/$share \
 		&& [[ "$useenhancedio" = "yes" ]] && {
-				/sbin/sysctl dev.enhanceio.$rbdpool-$share.do_clean=1 \
+				/sbin/sysctl dev.enhanceio.$share.do_clean=1 \
 				&& echo -n "wb cache cleaned, "
 			} \
 			|| /bin/echo -n "no cache, " \
