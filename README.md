@@ -92,7 +92,7 @@ Also, you can add this on crontab to run everyday the script :
 ## More
 
 Ceph Project : http://ceph.com/
-Samba Shadow Copy : http://www.samba.org/samba/docs/man/manpages/vfs_shadow_copy2.8.html
 
+Samba Shadow Copy : http://www.samba.org/samba/docs/man/manpages/vfs_shadow_copy2.8.html
 
 
