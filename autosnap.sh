@@ -74,7 +74,7 @@ $(echo "$snapcollection" | grep `date -u +GMT-%Y.%m.%d- -d "$i month ago"` | hea
 	done
 
 	# Shadow copy to mount
-	echo -e "* Shadow Copy to mount for $rbdpool/$share@$snapshot :\n$shadowcopylist" | sed 's/^$/-/g'
+	echo -e "* Shadow Copy to mount for $rbdpool/$share :\n$shadowcopylist" | sed 's/^$/-/g'
 
 	# GET MOUNTED SNAP
 	[ ! -d $sharedirectory/$share/.snapshots ] && echo "Snapshot directory $sharedirectory/$share/.snapshots does not exist. Please create it before run." && return
@@ -103,8 +103,17 @@ $(echo "$snapcollection" | grep `date -u +GMT-%Y.%m.%d- -d "$i month ago"` | hea
 }
 
 
-for share in $sharelist; do
-	[[ "$snapshotenable" = "yes" ]] && makesnapshot $share
-	[[ "$mountshadowcopyenable" = "yes" ]] && mountshadowcopy $share
-done
+if [[ "$snapshotenable" = "yes" ]]; then
+	for share in $sharelist; do
+		makesnapshot $share
+	done
+fi
+
+[[ "$snapshotenable" = "yes" ]] && [[ "$mountshadowcopyenable" = "yes" ]] && sleep 60
+
+if [[ "$mountshadowcopyenable" = "yes" ]]; then
+	for share in $sharelist; do
+		mountshadowcopy $share
+	done
+fi
 
