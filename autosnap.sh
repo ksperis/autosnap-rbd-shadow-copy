@@ -41,7 +41,7 @@ makesnapshot() {
 			|| /bin/echo -n "no cache, " \
 		&& rbd --id=$id --keyring=$keyring snap create $rbdpool/$share@$snapname \
 		&& echo "snapshot created."
-	xfs_freeze -u /$share
+	xfs_freeze -u $sharedirectory/$share
 
 }
 
