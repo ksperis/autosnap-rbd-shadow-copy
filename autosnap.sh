@@ -30,13 +30,18 @@ makesnapshot() {
 	snapname=`date -u +GMT-%Y.%m.%d-%H.%M.%S-autosnap`
 
 	echo "* Create snapshot for $share: @$snapname"
+	[[ "$useenhancedio" = "yes" ]] && {
+		/sbin/sysctl dev.enhanceio.$share.do_clean=1
+		while [[ `cat /proc/sys/dev/enhanceio/$share/do_clean` == 1 ]]; do sleep 1; done
+	}
 	mountpoint -q $sharedirectory/$share \
 		&& sync \
 		&& echo -n "synced, " \
 		&& xfs_freeze -f $sharedirectory/$share \
 		&& [[ "$useenhancedio" = "yes" ]] && {
-				/sbin/sysctl dev.enhanceio.$share.do_clean=1 \
-				&& echo -n "wb cache cleaned, "
+				/sbin/sysctl dev.enhanceio.$share.do_clean=1
+				while [[ `cat /proc/sys/dev/enhanceio/$share/do_clean` == 1 ]]; do sleep 1; done
+				echo -n "wb cache cleaned, "
 			} \
 			|| /bin/echo -n "no cache, " \
 		&& rbd --id=$id --keyring=$keyring snap create $rbdpool/$share@$snapname \
@@ -56,19 +61,19 @@ mountshadowcopy() {
 	shadowcopylist=$(echo "$snapcollection" | grep `date -u +GMT-%Y.%m.%d-` | head -n 1)
 	
 	# LAST 6 DAYS
-	for i in `seq 1 6`; do
+	for i in `seq 1 3`; do
 		shadowcopylist="$shadowcopylist
 $(echo "$snapcollection" | grep `date -u +GMT-%Y.%m.%d- -d "$i day ago"` | head -n 1)"
 	done
 	
 	# LAST 4 WEEKS
-	for i in `seq 1 4`; do
+	for i in `seq 1 2`; do
 		shadowcopylist="$shadowcopylist
 $(echo "$snapcollection" | grep `date -u +GMT-%Y.%m.%d- -d "$i week ago"` | head -n 1)"
 	done
 	
 	# LAST 5 MONTHS
-	for i in `seq 1 5`; do
+	for i in `seq 1 2`; do
 		shadowcopylist="$shadowcopylist
 $(echo "$snapcollection" | grep `date -u +GMT-%Y.%m.%d- -d "$i month ago"` | head -n 1)"
 	done
