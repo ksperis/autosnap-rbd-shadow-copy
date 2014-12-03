@@ -77,7 +77,7 @@ mountshadowcopy() {
             fi
 	done
 
-	# Shadow copy to mount
+	# Shadow copies to mount
 	echo -e "* Shadow Copy to mount for $rbdpool/$share :\n$shadowcopylist" | sed 's/^$/-/g'
 
 	# GET MOUNTED SNAP
@@ -103,7 +103,7 @@ mountshadowcopy() {
 		}
 	done
 
-	# Mount snap in $shadowcopylist not already mount
+	# Mount snaps in $shadowcopylist not already mount
 	for snapshot in $shadowcopylist; do
 		mountdir=$sharedirectory/$share/.snapshots/@$snapshot
 		mountpoint -q $mountdir || {
