@@ -57,33 +57,41 @@ mountshadowcopy() {
 	# GET ALL EXISTING SNAPSHOT ON RBD
 	snapcollection=$(rbd snap ls $rbdpool/$share | awk '{print $2}' | grep -- 'GMT-.*-autosnap$' | sort | sed 's/-autosnap$//g')
 
-	# TODAY
-	shadowcopylist=$(echo "$snapcollection" | grep `date -u +GMT-%Y.%m.%d-` | head -n 1)
-	
-	# LAST 6 DAYS
-	for i in `seq 1 3`; do
-		shadowcopylist="$shadowcopylist
-$(echo "$snapcollection" | grep `date -u +GMT-%Y.%m.%d- -d "$i day ago"` | head -n 1)"
-	done
-	
-	# LAST 4 WEEKS
-	for i in `seq 1 2`; do
-		shadowcopylist="$shadowcopylist
-$(echo "$snapcollection" | grep `date -u +GMT-%Y.%m.%d- -d "$i week ago"` | head -n 1)"
-	done
-	
-	# LAST 5 MONTHS
-	for i in `seq 1 2`; do
-		shadowcopylist="$shadowcopylist
-$(echo "$snapcollection" | grep `date -u +GMT-%Y.%m.%d- -d "$i month ago"` | head -n 1)"
+	datestart=$(date -u +%Y.%m.%d -d "$daterange")
+        echo "start $datestart"
+        dateend=$(date -u +%Y.%m.%d)
+        echo "end $dateend"
+
+        for snapitem in $(echo "$snapcollection")
+        do
+            timestamp=$(echo "$snapitem"|awk -F- '{print $2}')
+            # Do inclusive range check
+	    if [[ "$timestamp" == "$datestart" ||
+                        "$timestamp" >  "$datestart" && "$timestamp" <  "$dateend" ||
+                        "$timestamp" == "$dateend" ]]
+            then
+                echo "$snapitem in range, adding to mount list."
+                shadowcopylist=$(echo "$shadowcopylist $snapitem")
+            else
+                echo "$snapitem not in range, ignoring."
+            fi
 	done
 
-	# Shadow copy to mount
+	# Shadow copies to mount
 	echo -e "* Shadow Copy to mount for $rbdpool/$share :\n$shadowcopylist" | sed 's/^$/-/g'
 
 	# GET MOUNTED SNAP
 	[ ! -d $sharedirectory/$share/.snapshots ] && echo "Snapshot directory $sharedirectory/$share/.snapshots does not exist. Please create it before run." && return
-	snapmounted=`ls $sharedirectory/$share/.snapshots | sed 's/^@//g'`
+	snapmounted=$(mount|grep $sharedirectory/$share/.snapshots|awk '{print $3}'|awk -F/ '{print $NF}'|sed 's/^@//g')
+        # Cleanup abandoned snap mountpoints                                                                                                                                                                      
+        for mountdir in $(ls "$sharedirectory/$share/.snapshots"|sed 's/^@//g')
+        do
+            if [[ ! $(echo "$snapmounted"|grep "$mountdir") ]]
+            then
+                echo "$sharedirectory/$share/.snapshots/@$mountdir exists but not mounted, removing."
+                rmdir "$sharedirectory/$share/.snapshots/@$mountdir"
+            fi
+        done
 
 	# Umount Snapshots not selected in shadowcopylist
 	for snapshot in $snapmounted; do
@@ -95,7 +103,7 @@ $(echo "$snapcollection" | grep `date -u +GMT-%Y.%m.%d- -d "$i month ago"` | hea
 		}
 	done
 
-	# Mount snap in $shadowcopylist not already mount
+	# Mount snaps in $shadowcopylist not already mount
 	for snapshot in $shadowcopylist; do
 		mountdir=$sharedirectory/$share/.snapshots/@$snapshot
 		mountpoint -q $mountdir || {
