@@ -59,7 +59,7 @@ makesnapshot() {
 
 mountshadowcopy() {
 	share=$1
-
+	shadowcopylist=""
 	# GET ALL EXISTING SNAPSHOT ON RBD
 	snapcollection=$(rbd --id=$id --keyring=$keyring snap ls $rbdpool/$share | awk '{print $2}' | grep -- 'GMT-.*-autosnap$' | sort | sed 's/-autosnap$//g')
 
