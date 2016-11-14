@@ -103,9 +103,9 @@ mountshadowcopy() {
 	for snapshot in $snapmounted; do
 		mountdir=$sharedirectory/$share/.snapshots/@$snapshot
 		echo "$shadowcopylist" | grep -q "$snapshot" || {
-			umount $mountdir || umount -l $mountdir
-			rmdir $mountdir
-			rbd unmap /dev/rbd/$rbdpool/$share@$snapshot-autosnap
+			umount $mountdir \
+			&& rmdir $mountdir \
+			&& rbd unmap /dev/rbd/$rbdpool/$share@$snapshot-autosnap
 		}
 	done
 
