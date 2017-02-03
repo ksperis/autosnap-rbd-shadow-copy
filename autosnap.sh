@@ -114,7 +114,7 @@ mountshadowcopy() {
 		mountdir=$sharedirectory/$share/.snapshots/@$snapshot
 		mountpoint -q $mountdir || {
 			[ ! -d $mountdir ] && mkdir $mountdir
-			rbd showmapped | awk '{print $4}' | grep "^$" || rbd --id=$id --keyring=$keyring map $rbdpool/$share@$snapshot-autosnap
+			rbd showmapped | awk '{print $4}' | grep "^$" || rbd --id=$id --keyring=$keyring map $rbdpool/$share@$snapshot-autosnap > /dev/null
 			mount $mntoptions /dev/rbd/$rbdpool/$share@$snapshot-autosnap $mountdir
 		}
 	done
